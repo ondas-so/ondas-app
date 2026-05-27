@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<title>ONDAS</title>
+
+<meta name="description" content="A screenwriting editor. No installs, no friction, no cost. A blank page and whatever story you’ve been putting off.">
+<meta property="og:title" content="ONDAS — The Screenwriter's Editor">
+<meta property="og:description" content="No installs, no friction, no cost. Open a script and start writing.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ONDAS — The Screenwriter's Editor">
+<meta name="twitter:description" content="No installs, no friction, no cost. Open a script and start writing.">
+
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,800;0,900;1,400;1,500&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous"/>
+
+<style>
+
+  html { scroll-behavior: smooth; }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    --bg: #030303;
+    --bg-soft: #0a0a0a;
+    --white: #fefaf5;
+    --white-dim: rgba(254, 250, 245, 0.75);
+    --white-faint: rgba(254, 250, 245, 0.12);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-border-light: rgba(255, 255, 255, 0.18);
+    --accent: #d9c6b0;
+    --accent-glow: rgba(217, 198, 176, 0.25);
+    --mono: #9a958c;
+    --green-soft: #b8d4aa;
+    --radius-xl: 70px;
+    --radius-lg: 42px;
+    --radius-md: 28px;
+    --radius-sm: 20px;
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-apple: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --glass-bg: rgba(20, 20, 22, 0.45);
+    --glass-bg-light: rgba(30, 30, 35, 0.55);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow-x: hidden;
+    line-height: 1.4;
+    cursor: default;
+  }
+
+  ::selection { background: rgba(217, 198, 176, 0.35); color: #c8b89a; }
+
+  .a2 {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(217, 198, 176, 0.3);
+    transition: border-color 0.3s var(--ease-apple);
+  }
+
+  .a2:hover { border-color: var(--accent); }
+
+  .floating-orb {
+    position: fixed;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(217, 198, 176, 0.2), rgba(217, 198, 176, 0.02));
+    filter: blur(70px);
+    pointer-events: none;
+    z-index: 0;
+    will-change: transform;
+  }
+
+  .orb-1 {
+    width: 55vw;
+    height: 55vw;
+    top: -20vh;
+    right: -15vw;
+    background: radial-gradient(circle, rgba(200, 180, 150, 0.2), transparent);
+    animation: orbDrift1 22s ease-in-out infinite;
+  }
+
+  .orb-2 {
+    width: 70vh;
+    height: 70vh;
+    bottom: -10vh;
+    left: -20vw;
+    background: radial-gradient(circle, rgba(160, 140, 115, 0.15), transparent);
+    animation: orbDrift2 28s ease-in-out infinite;
+  }
+
+  .orb-3 {
+    width: 40vw;
+    height: 40vw;
+    bottom: 30vh;
+    right: 10vw;
+    background: radial-gradient(circle, rgba(210, 190, 165, 0.1), transparent);
+    animation: orbDrift3 18s ease-in-out infinite;
+  }
+
+  @keyframes orbDrift1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%       { transform: translate(-3vw, 4vh) scale(1.05); }
+    66%       { transform: translate(2vw, -3vh) scale(0.96); }
+  }
+
+  @keyframes orbDrift2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    40%       { transform: translate(4vw, -5vh) scale(1.08); }
+    70%       { transform: translate(-2vw, 3vh) scale(0.94); }
+  }
+
+  @keyframes orbDrift3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%       { transform: translate(-3vw, -4vh) scale(1.1); }
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.045'/%3E%3C/svg%3E");
+    background-size: 280px;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.4;
+  }
+
+  .glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+  }
+
+  nav {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 28px;
+    z-index: 200;
+    background: rgba(3, 3, 3, 0.6);
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    border-radius: 80px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.5s var(--ease-apple);
+    will-change: background, border-color;
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--white);
+    text-decoration: none;
+    background: linear-gradient(135deg, #fff, #e0d6ca);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 42px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--white-dim);
+    text-decoration: none;
+    transition: color 0.3s var(--ease-apple), opacity 0.3s var(--ease-apple);
+  }
+
+  .nav-links a:hover { color: var(--white); opacity: 1; }
+  
+  .nav-cta {
+    background: rgba(255,255,245,0.95);
+    border: none;
+    padding: 8px 26px;
+    border-radius: 70px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #0a0a0a;
+    font-family: Helvetica, 'Helvetica Neue', Arial, sans-serif;
+    transition: all 0.4s var(--ease-spring);
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .nav-cta:hover { background: var(--accent); transform: scale(0.96); }
+
+  .a3 { color: #0a0a0a; }
+
+  #hero {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+  }
+
+  #hero-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 12;
+    padding: 0 48px 80px;
+  }
+
+  .hero-tag {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--mono);
+    margin-bottom: 24px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .hero-title .line {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: clamp(5rem, 13vw, 12rem);
+    line-height: 0.86;
+    letter-spacing: -0.02em;
+    transform: translateY(110%);
+    transition: transform 1.3s var(--ease-out-expo);
+    will-change: transform;
+  }
+
+  .hero-title .line.visible { transform: translateY(0); }
+
+  .hero-title .line:nth-child(2) {
+    font-style: italic;
+    font-weight: 400;
+    font-size: 0.45em;
+    color: var(--accent);
+    margin-left: 0.2em;
+  }
+
+  .hero-sub {
+    margin-top: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 28px;
+  }
+
+  .hero-desc {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: var(--white-dim);
+    max-width: 380px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1s 0.5s var(--ease-apple), transform 1.2s 0.5s var(--ease-out-expo);
+  }
+
+  .hero-desc.visible { opacity: 1; transform: translateY(0);}
+  .hero-cta-wrap {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1s 0.7s var(--ease-apple), transform 1.2s 0.7s var(--ease-out-expo);
+  }
+
+  .hero-cta-wrap.visible { opacity: 1; transform: translateY(0);}
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255,255,245,0.08);
+    backdrop-filter: blur(28px);
+    border: 1px solid rgba(255,255,245,0.2);
+    border-radius: 70px;
+    transition: border-color 0.4s var(--ease-apple), background 0.4s var(--ease-apple), transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease-apple);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
+    cursor: pointer;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 40%, rgba(255,255,245,0.07) 50%, transparent 60%);
+    transform: translateX(-100%);
+    transition: transform 0.6s var(--ease-apple);
+    pointer-events: none;
+  }
+
+  .btn-primary:hover::before {
+    transform: translateX(100%);
+  }
+
+  .btn-primary:hover {
+    border-color: rgba(255,255,245,0.5);
+    background: rgba(255,255,245,0.13);
+    transform: scale(0.975);
+    box-shadow: 0 0 32px rgba(217, 198, 176, 0.12);
+  }
+
+  .btn-primary-label {
+    padding: 14px 28px 14px 30px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--white);
+    font-family: Helvetica, 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  .btn-primary-arrow {
+    width: 44px;
+    height: 44px;
+    background: var(--white);
+    border-radius: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+    transition: background 0.4s var(--ease-apple), transform 0.4s var(--ease-spring);
+  }
+
+  .btn-primary:hover .btn-primary-arrow {
+    background: var(--accent);
+    transform: translateX(3px);
+  }
+
+  .btn-primary-arrow svg { width: 22px; fill: none; stroke: #030303; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .hero-note {
+    font-size: 0.6rem;
+    font-family: monospace;
+    color: var(--mono);
+    margin-top: 12px;
+    display: block;
+    text-align: right;
+  }
+
+  .marquee-wrap {
+    background: rgba(15, 15, 18, 0.5);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
+    overflow: hidden;
+    padding: 18px 0;
+  }
+
+  .marquee-track {
+    display: flex;
+    gap: 64px;
+    animation: marquee 26s linear infinite;
+    width: max-content;
+  }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .marquee-item {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--mono);
+    white-space: nowrap;
+    display: flex;
+    gap: 64px;
+  }
+
+  .marquee-item::after { content: "⚬"; margin-left: 64px; opacity: 0.5; }
+
+  .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.9s var(--ease-apple), transform 1.1s var(--ease-out-expo); will-change: opacity, transform; }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  #about {
+    padding: 140px 48px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+  }
+
+  .about-label { font-size: 0.6rem; letter-spacing: 0.28em; color: var(--mono); margin-bottom: 40px; text-transform: uppercase; }
+
+  .about-headline { font-family: 'Playfair Display', serif; font-size: clamp(2.8rem, 4.5vw, 4.5rem); font-weight: 500; line-height: 1.1; font-style: italic; }
+
+  .about-body { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; line-height: 1.9; color: var(--white-dim); margin-bottom: 32px; }
+
+  .about-stat-row {
+    display: flex;
+    gap: 48px;
+    margin-top: 48px;
+    padding-top: 28px;
+    border-top: 1px solid var(--glass-border);
+  }
+
+  .stat-number { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 700; color: var(--white); }
+
+  .stat-label { font-size: 0.6rem; letter-spacing: 0.2em; color: var(--mono); margin-top: 8px; text-transform: uppercase; }
+
+  #features { padding: 0 48px 140px; }
+
+  .features-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 60px;
+    border-top: 1px solid var(--glass-border);
+    padding-top: 48px;
+  }
+
+  .features-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 3.5vw, 3.5rem); font-weight: 500; }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 100px;
+  }
+
+  .feature-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 55px;
+    padding: 44px 36px;
+    transition: transform 0.5s var(--ease-spring), border-color 0.4s var(--ease-apple), background 0.4s var(--ease-apple), box-shadow 0.5s var(--ease-apple);
+    will-change: transform;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-10px) scale(1.01);
+    border-color: rgba(255,255,245,0.18);
+    background: rgba(30, 30, 36, 0.65);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.35), 0 0 40px rgba(217, 198, 176, 0.06);
+  }
+
+  .feature-card-large {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: 2fr 2fr;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .feature-card-large .feature-inner { padding: 44px 36px; }
+
+  .feature-card-large .feature-visual {
+    background: rgba(0,0,0,0.2);
+    border-left: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .feature-num { font-size: 0.6rem; letter-spacing: 0.2em; color: var(--mono); margin-bottom: 28px; font-family: monospace; }
+
+  .feature-icon {
+    width: 48px; height: 48px;
+    border-radius: 28px;
+    background: rgba(255,255,245,0.05);
+    border: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+    transition: background 0.4s var(--ease-apple), border-color 0.4s var(--ease-apple), transform 0.5s var(--ease-spring);
+  }
+
+  .feature-card:hover .feature-icon {
+    background: rgba(217, 198, 176, 0.1);
+    border-color: rgba(217, 198, 176, 0.25);
+    transform: scale(1.08);
+  }
+
+  .feature-name { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 500; margin-bottom: 16px; }
+
+  .feature-desc { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; line-height: 1.8; color: var(--mono); }
+
+  #cta-banner {
+    margin: 0 48px 100px;
+    background: var(--glass-bg-light);
+    backdrop-filter: blur(32px);
+    border: 1px solid var(--glass-border-light);
+    border-radius: var(--radius-xl);
+    padding: 88px 72px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 48px;
+  }
+
+  .cta-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 5vw, 4.6rem);
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  .cta-headline em { font-style: italic; color: var(--accent); font-weight: 500; }
+
+  .cta-sub { font-family: monospace; font-size: 0.75rem; line-height: 1.7; color: var(--white-dim); max-width: 300px; text-align: right; }
+
+  #workflow { padding: 40px 48px 140px; }
+
+  .workflow-title { font-family: 'Playfair Display', serif; font-size: clamp(2.8rem, 5vw, 5rem); font-weight: 800; line-height: 1; max-width: 700px; margin-top: 24px; }
+
+  .workflow-steps { margin-top: 64px; }
+
+  .workflow-step {
+    display: grid;
+    grid-template-columns: 100px 1fr 1.2fr;
+    gap: 40px;
+    align-items: center;
+    padding: 36px 32px;
+    border-radius: 80px;
+    transition: background 0.4s var(--ease-apple), transform 0.4s var(--ease-spring), border 0.3s var(--ease-apple), box-shadow 0.4s var(--ease-apple);
+    margin-bottom: 8px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    will-change: transform;
+  }
+
+  .workflow-step:hover {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,245,0.09);
+    transform: scale(1.015);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  }
+
+  .step-num { font-family: monospace; font-size: 0.75rem; color: var(--accent); letter-spacing: 0.1em; }
+
+  .step-name { font-family: 'Playfair Display', serif; font-size: 1.7rem; font-weight: 500; }
+
+  .step-desc { font-family: monospace; font-size: 0.7rem; line-height: 1.7; color: var(--mono); }
+
+  #compare { padding: 0 48px 140px; }
+
+  .compare-header { text-align: center; margin-bottom: 56px; }
+
+  .compare-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 3.5vw, 3.5rem); font-style: italic; }
+
+  .compare-sub { font-size: 0.7rem; color: var(--mono); margin-top: 12px; }
+
+  .compare-table-wrapper {
+    border-radius: 60px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    overflow-x: auto;
+  }
+
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 60px;
+    overflow: hidden;
+  }
+
+  .compare-table th, .compare-table td {
+    padding: 20px 28px;
+    text-align: left;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    border-bottom: 1px solid rgba(255,255,245,0.05);
+  }
+
+  .compare-table th {
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--mono);
+  }
+
+  .compare-table .ondas-col {
+    background: rgba(217, 198, 176, 0.12);
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .check { color: var(--green-soft); font-weight: 600; }
+
+  .cross { color: rgba(255,255,245,0.25); }
+
+  footer { background: #000; padding: 0 48px; }
+
+  .footer-brand {
+    padding: 80px 0 64px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.04);
+  }
+
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 14px;
+    background: linear-gradient(135deg, #fff, #d9c6b0);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .footer-tagline {
+    font-family: monospace;
+    font-size: 0.72rem;
+    line-height: 1.6;
+    color: var(--mono);
+    margin-bottom: 16px;
+  }
+
+  .footer-email {
+    font-family: 'Helvetica';
+    margin-top: 28px;
+    font-size: 0.80rem;
+    color: rgba(255,255,245,0.45);
+    text-decoration: none;
+    transition: color 0.3s var(--ease-apple);
+    display: block;
+  }
+
+  .arrow_out-icon {
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  vertical-align: middle;
+  }
+
+  .newsletter-section {
+    margin: 48px 0 28px;
+    padding: 0;
+    width: 100%;
+  }
+
+  .newsletter-title {
+    font-family: 'Inter';
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+
+  .newsletter-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    color: rgba(254, 250, 245, 0.42);
+    margin-bottom: 28px;
+    letter-spacing: 0.01em;
+    line-height: 1.55;
+  }
+
+  .newsletter-capsule {
+    display: flex;
+    align-items: center;
+    background: #e9e9e9;
+    border-radius: 100px;
+    padding: 7px 7px 7px 28px;
+    max-width: 560px;
+    width: 100%;
+    box-shadow:
+      8px 8px 20px rgba(0, 0, 0, 0.18),
+      -4px -4px 12px rgba(255, 255, 255, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    transition:
+      box-shadow 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .newsletter-capsule:hover {
+    box-shadow:
+      3px 3px 8px rgba(0, 0, 0, 0.22),
+      -1px -1px 4px rgba(255, 255, 255, 0.05),
+      inset 4px 4px 12px rgba(0, 0, 0, 0.14),
+      inset -2px -2px 6px rgba(255, 255, 255, 0.1);
+  }
+
+  .newsletter-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 400;
+    color: #1a1a1a;
+    letter-spacing: 0.01em;
+    padding: 10px 0;
+    caret-color: #1a1a1a;
+    min-width: 0;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .newsletter-input::placeholder {
+    color: #aaa;
+    font-weight: 400;
+    transition: color 0.3s ease;
+  }
+
+  .newsletter-input:focus::placeholder { color: #c0c0c0; }
+
+  .newsletter-input.subscribed-msg {
+    color: #555;
+    font-style: italic;
+  }
+
+  .newsletter-btn {
+    flex-shrink: 0;
+    background: #0a0a0a;
+    color: #fefaf5;
+    border: none;
+    border-radius: 100px;
+    padding: 13px 26px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    outline: none;
+    box-shadow:
+      0 4px 14px rgba(0, 0, 0, 0.45),
+      0 1px 3px rgba(0, 0, 0, 0.3);
+    transition:
+      background 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      color 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      box-shadow 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    -webkit-appearance: none;
+    appearance: none;
+    white-space: nowrap;
+  }
+
+  .newsletter-btn:hover {
+    background: #ffffff;
+    color: #0a0a0a;
+    box-shadow:
+      0 6px 22px rgba(0, 0, 0, 0.2),
+      0 2px 8px rgba(0, 0, 0, 0.12),
+      0 0 0 1px rgba(0, 0, 0, 0.06);
+  }
+
+  .newsletter-btn:focus-visible {
+    outline: 2px solid rgba(217, 198, 176, 0.6);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 520px) {
+    .newsletter-capsule {
+      padding: 6px 6px 6px 20px;
+    }
+    .newsletter-input {
+      font-size: 0.76rem;
+    }
+    .newsletter-btn {
+      padding: 12px 18px;
+      font-size: 0.72rem;
+    }
+    .newsletter-title {
+      font-size: clamp(1.6rem, 6vw, 2.2rem);
+    }
+  }
+
+  .footer-email:hover { color: var(--white); }
+
+  .footer-section { padding: 68px 0 0; }
+
+  .footer-section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: none;
+    color: rgba(255,255,245,0.25);
+    padding-bottom: 20px;
+    margin-bottom: 0;
+  }
+
+  .footer-nav-list { list-style: none; }
+
+  .footer-nav-list li {
+    border-bottom: none;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.25) 0.5px, transparent 0.5px);
+    background-size: 3px 1px;
+    background-repeat: repeat-x;
+    background-position: bottom;
+  }
+
+  .footer-nav-list a {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 20px 0 14px;
+    font-family: Helvetica, 'Helvetica Neue', Arial, sans-serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    font-weight: 400;
+    color: #cfcfcf;
+    text-decoration: none;
+    letter-spacing: -0.02em;
+    transition: color 0.3s var(--ease-apple), padding-left 0.35s var(--ease-out-expo);
+  }
+
+  .footer-nav-list a:hover {
+    color: var(--accent);
+    padding-left: 10px;
+  }
+
+  .footer-nav-list a svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.3s var(--ease-apple), transform 0.3s var(--ease-apple);
+  }
+
+  .footer-nav-list a:hover svg {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .footer-bottom {
+    margin-top: 48px;
+    padding: 28px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Helvetica';
+    font-size: 0.6rem;
+    color: rgba(255,255,245,0.3);
+  }
+
+  .footer-back-top {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: rgba(255,255,245,0.3);
+    text-decoration: none;
+    font-family: 'Helvetica';
+    font-size: 0.6rem;
+    transition: color 0.3s var(--ease-apple);
+  }
+
+  .footer-back-top:hover { color: var(--white); }
+
+  .footer-back-top svg {
+    width: 12px; height: 12px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .footer-right { text-align: right; display: flex; flex-direction: column; gap: 5px; }
+
+  @media (max-width: 1000px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .feature-card-large { grid-column: span 1; display: block; }
+    #about { grid-template-columns: 1fr; gap: 40px; }
+    .workflow-step { grid-template-columns: 1fr; gap: 12px; text-align: left; border-radius: 48px; }
+    .footer-nav-list a { font-size: 1.5rem; }
+    .hero-content { padding: 0 28px 60px; }
+  }
+  
+  @media (max-width: 640px) {
+    .nav-links { display: none; }
+    nav { justify-content: space-between; padding: 8px 20px; }
+    #cta-banner { flex-direction: column; text-align: center; padding: 48px 32px; }
+    .cta-sub { text-align: center; max-width: 100%; }
+  }
+
+  #login-view {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    background: #000;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  #login-view .lv-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #login-view #login-wave-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  #login-view .lv-content-group {
+    position: relative;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 32px;
+  }
+
+  #login-view .lv-logo-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 32px;
+    text-align: center;
+  }
+
+  #login-view .lv-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(52px, 12vw, 84px);
+    font-weight: 500;
+    text-transform: uppercase;
+    color: #fff;
+    opacity: 0.95;
+    margin-bottom: 16px;
+  }
+
+  #login-view .lv-tagline {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(14px, 3vw, 18px);
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  #login-view .lv-actions {
+    position: relative;
+    z-index: 20;
+    padding: 0 32px;
+    max-width: 380px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  #login-view .lv-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: 54px;
+    border-radius: 27px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    border: none;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    color: #868686;
+  }
+
+  #login-view .lv-btn:hover { color: white; }
+
+  #login-view .lv-btn-glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  #login-view .lv-btn-glass:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  #login-view .lv-btn-glass:active { transform: scale(0.98); }
+
+  #login-view .lv-btn .fa-apple {
+    font-size: 20px;
+    line-height: 1;
+    position: relative;
+    top: -1px;
+  }
+
+  #login-view .lv-footer {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+    white-space: nowrap;
+  }
+
+  #login-view .lv-footer a {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  #login-view .lv-footer a:hover { color: rgba(255, 255, 255, 0.7); }
+
+  #login-view .lv-footer span { color: rgba(255, 255, 255, 0.4); }
+
+  #login-view .lv-privacy-note {
+    text-align: center;
+    padding: 0 40px;
+  }
+
+  #login-view .lv-privacy-note p {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.2);
+    letter-spacing: 0.01em;
+    line-height: 1.65;
+  }
+
+  #login-view .lv-privacy-note a {
+    color: rgba(255, 255, 255, 0.32);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    padding-bottom: 1px;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  #login-view .lv-privacy-note a:hover {
+    color: rgba(255, 255, 255, 0.58);
+    border-color: rgba(255, 255, 255, 0.38);
+  }
+
+  @keyframes lvFadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  #login-view.is-visible .lv-btn { animation: lvFadeUp 0.5s ease both; }
+  #login-view.is-visible .lv-btn:nth-child(1) { animation-delay: 0.08s; }
+  #login-view.is-visible .lv-btn:nth-child(2) { animation-delay: 0.16s; }
+  #login-view.is-visible .lv-btn:nth-child(3) { animation-delay: 0.24s; }
+  #login-view.is-visible .lv-footer { animation: lvFadeUp 0.5s 0.32s ease both; }
+  #login-view.is-visible .lv-privacy-note { animation: lvFadeUp 0.5s 0.4s ease both; }
+
+  @media (max-width: 480px) {
+    #login-view .lv-actions { padding: 0 24px; }
+    #login-view .lv-privacy-note { padding: 0 28px; }
+  }
+
+  .back-button {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border: 0.7px solid transparent;
+    border-radius: 50%;
+    background: transparent;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    color: #868686;
+    font-size: 30px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+    z-index: 10000;
+  }
+
+  .back-button:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    box-shadow:
+      0 10px 20px rgba(0, 0, 0, 0.02),
+      0 0 0 0.5px rgba(255, 255, 255, 0.1);
+    transform: scale(1.15);
+    color: white;
+  }
+
+  .back-button:active {
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(12px) saturate(200%);
+    -webkit-backdrop-filter: blur(12px) saturate(200%);
+    box-shadow:
+      inset 0 4px 8px rgba(0, 0, 0, 0.02),
+      0 6px 14px rgba(0, 0, 0, 0.02);
+    transform: scale(1.1) translateX(-1px);
+  }
+
+</style>
+</head>
+<body>
+
+<div class="floating-orb orb-1"></div>
+<div class="floating-orb orb-2"></div>
+<div class="floating-orb orb-3"></div>
+
+<nav>
+  <a class="nav-logo">ONDAS</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#workflow">How it works</a></li>
+  </ul>
+  <a class="nav-cta a3" href="#" id="nav-start-btn">Start</a>
+</nav>
+
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <h1 class="hero-title">
+      <span class="line" id="line1">ONDAS</span>
+    </h1>
+    <div class="hero-sub">
+      <p class="hero-desc" id="hero-desc">A screenwriting editor. No installs, no friction, no cost. A blank page and whatever story you’ve been putting off.</p>
+      <div class="hero-cta-wrap" id="hero-cta">
+        <a href="#" class="btn-primary start-btn">
+          <span class="btn-primary-label">Start writing</span>
+          <span class="btn-primary-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="about-stat-row reveal reveal-delay-2"></div>
+  <div>
+    <p class="about-label reveal">§ about</p>
+    <h2 class="about-headline reveal reveal-delay-1">Distraction is the enemy.<br>Clarity is the weapon.</h2>
+  </div>
+  <div class="about-right">
+    <p class="about-body reveal">ONDAS was built by <a class="a2" href="https://macy-veil.github.io/portfolio/">Macy Veil</a> — a screenwriter who spent too many years fighting his own tools. Final Draft crashed mid-draft. Subscription fees kept climbing. He wanted something that just worked, looked right, and stayed out of his way. So he built it himself.</p>
+    <p class="about-body reveal reveal-delay-1">It runs in your browser. Open a script and start writing. Fountain syntax handles formatting as you go. When you’re done, export to PDF, Final Draft, or plain Fountain. Whatever your production needs.</p>
+  </div>
+</section>
+
+<section id="features">
+  <div class="features-header">
+    <h2 class="features-title reveal">What it does</h2>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <div class="feature-num">01</div>
+      <div class="feature-icon"><svg width="20" viewBox="0 0 24 24" stroke="var(--white-dim)" fill="none"><path d="M4 7L4 4 20 4 20 7M9 20L15 20M12 4L12 20" stroke="currentColor"/></svg></div>
+      <h3 class="feature-name">Shortcut-driven syntax</h3>
+
+      <p class="feature-desc">Two quotes, four letters, and the formatting just happens.<br><br>""char, ""pars, ""dial, ""actl, ""slug, ""trans — every element of the screenplay has a code.<br><br>Scene headings, page breaks, dialogue, transitions. All of it, without leaving the keyboard. If you’ve ever used Vim, you’ll feel it.</p>
+
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <div class="feature-num">02</div>
+      <div class="feature-icon"><svg width="20" viewBox="0 0 24 24" fill="black" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <h3 class="feature-name">Focus mode</h3>
+
+      <p class="feature-desc">One keystroke and everything else disappears. Just the text, centered on the page. No panels, no menus, no cortisol.</p>
+
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <div class="feature-num">03</div>
+      <div class="feature-icon"><svg width="20" viewBox="0 0 24 24" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+      <h3 class="feature-name">Notes & revisions</h3>
+
+      <p class="feature-desc">Leave margin notes without cluttering the script. Color-code revision rounds the way productions actually do. Blue pages, pink pages, yellow. Add images too, if you’re Fargeat. Everything is customizable.</p>
+
+    </div>
+    <div class="feature-card feature-card-large reveal reveal-delay-2">
+      <div class="feature-inner">
+        <div class="feature-num">04</div>
+        <div class="feature-icon"><svg width="20" viewBox="0 0 24 24" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <h3 class="feature-name">Beat board & outlining</h3>
+
+        <p class="feature-desc">A canvas where your scenes live as cards. Arrange them however your brain needs. By act, by thread, scattered across the board. When a scene is ready, drag it into the script. Rearrange on the canvas and the script rearranges with it.<br><br>Good for finding structure before you’ve written a single line.</p></div>
+        </div>
+
+    <div class="feature-card reveal reveal-delay-2"><div class="feature-num">05</div><div class="feature-icon"><svg width="20" viewBox="0 0 24 24" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><h3 class="feature-name">PDF, FDX, Fountain, TXT</h3><p class="feature-desc">When it’s ready, export to whatever your producer or collaborator needs. Formatted exactly as the industry expects.</p></div>
+
+    <div class="feature-card reveal reveal-delay-3"><div class="feature-num">06</div><div class="feature-icon"><svg width="20" viewBox="0 0 24 24" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/></svg></div><h3 class="feature-name">Runs in your browser</h3><p class="feature-desc">Chrome, Brave, Safari. Works in all of them. No download, no update prompts. Your scripts are saved locally and in the cloud, so they’re there when you come back.</p></div>
+
+  </div>
+</section>
+
+<div id="cta-banner" class="reveal">
+  <div><p class="about-label" style="margin-bottom: 15px;" >§ sit down and write</p><h2 class="cta-headline"><br>Write the <em>story</em><br>only you can tell.</h2></div>
+
+<a href="#" class="btn-primary start-btn" style="align-self: center;"><span class="btn-primary-label">Start writing — it’s free</span><span class="btn-primary-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></a>
+</div>
+
+<section id="workflow">
+
+  <div><p class="about-label reveal">§ how it works</p><h2 class="workflow-title reveal reveal-delay-1">From blank page to Fade Out.</h2></div>
+  <div class="workflow-steps">
+    <div class="workflow-step reveal"><span class="step-num">01</span><h3 class="step-name">Start</h3><p class="step-desc">Open and begin writing. No setup, no preferences. You’re on the page in seconds. Sign in to keep your work in sync.</p></div>
+    <div class="workflow-step reveal"><span class="step-num">02</span><h3 class="step-name">Write</h3><p class="step-desc">Use the shortcut system to format as you go.<br><code>""char</code>, <code>""dial</code>, <code>""actl</code> — the structure builds itself while you think about the story.</p></div>
+    <div class="workflow-step reveal"><span class="step-num">03</span><h3 class="step-name">Revise</h3><p class="step-desc">Open the beat board, rearrange, add notes, color the revision rounds. Rewrite as many times as the script needs.</p></div>
+    <div class="workflow-step reveal"><span class="step-num">04</span><h3 class="step-name">Customize</h3><p class="step-desc">Background, fonts, regional formatting, and more. Customize everything manually, or let ONDAS do it. The theme shifts automatically based on your typing speed. Stay in the mood.</p></div>
+    <div class="workflow-step reveal"><span class="step-num">05</span><h3 class="step-name">Import & export</h3><p class="step-desc">PDF, FDX, Fountain. Bring in an existing script or send it out to your producer, your agent, or just your drawer.</p></div>
+  </div>
+</section>
+
+<section id="compare">
+  <div class="compare-header">
+    <h2 class="compare-title reveal">Built different.</h2>
+    <p class="compare-sub reveal">
+      Final Draft costs $249. WriterSolo wants a subscription. ONDAS just want you to write.
+    </p>
+  </div>
+
+  <div class="compare-table-wrapper reveal">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th class="ondas-col">ONDAS</th>
+          <th>Final Draft</th>
+          <th>WriterSolo</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td>Pricing</td>
+          <td class="ondas-col"><span class="check">✓ Free</span></td>
+          <td><span class="cross">✗ $249+</span></td>
+          <td><span class="cross">✗ Freemium</span></td>
+        </tr>
+
+        <tr>
+          <td>Platform</td>
+          <td class="ondas-col"><span class="check">✓ Web (any device)</span></td>
+          <td><span class="check">✓ Desktop</span></td>
+          <td><span class="check">✓ Web</span></td>
+        </tr>
+
+        <tr>
+          <td>Account</td>
+          <td class="ondas-col"><span class="check">✓ Optional</span></td>
+          <td><span class="cross">✗ License required</span></td>
+          <td><span class="check">✓ Required</span></td>
+        </tr>
+
+        <tr>
+          <td>Focus mode</td>
+          <td class="ondas-col"><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+
+        <tr>
+          <td>Customization</td>
+          <td class="ondas-col"><span class="check">✓ (fully)</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+        
+        <tr>
+          <td>Shortcuts</td>
+          <td class="ondas-col"><span class="check">✓ Keyboard-first</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+
+        <tr>
+          <td>Beat board</td>
+          <td class="ondas-col"><span class="check">✓ Visual & synced</span></td>
+          <td><span class="check">✓ Basic</span></td>
+          <td><span class="cross">✗ Limited</span></td>
+        </tr>
+
+        <tr>
+          <td>Import & Export</td>
+          <td class="ondas-col"><span class="check">✓ Fountain, FDX, PDF</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+
+  <div class="footer-brand">
+    <span class="footer-logo">ONDAS</span>
+    <p class="footer-tagline"><i>Built by a writer, for writers.</i></p>
+
+    <!--NEWSLETTER SUBSCRIPTION-->
+
+    <section class="newsletter-section" aria-label="Newsletter signup">
+      <h2 class="newsletter-title">Keep up with us</h2>
+      <p class="newsletter-desc">Get news, proposals, features, surveys, and more.</p>
+
+      <div class="newsletter-capsule">
+        <input
+          class="newsletter-input"
+          type="email"
+          id="newsletterEmail"
+          placeholder="Email Address*"
+          autocomplete="email"
+          aria-label="Email address"
+        />
+        <button class="newsletter-btn" id="newsletterBtn" type="button">Sign Up</button>
+      </div>
+    </section>
+
+    <!--END NEWSLETTER-->
+
+    <a class="footer-email notranslate" href="mailto:hello.ondas@gmail.com" translate="no">Contact Us<img src="icons/arrow_out.svg" alt="" class="arrow_out-icon">
+</a>
+  </div>
+
+  <div class="footer-section">
+    <p class="footer-section-label">NAVIGATION</p>
+    <ul class="footer-nav-list">
+      <li><a href="#about">About<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></a></li>
+      <li><a href="#features">Features<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></a></li>
+      <li><a href="#workflow">How it works<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></a></li>
+      <li><a href="#compare">Compare<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></a></li>
+    </ul>
+  </div>
+
+  <div class="footer-section">
+    <p class="footer-section-label">RESOURCES</p>
+    <ul class="footer-nav-list">
+      <li><a href="#">Shortcut list<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></a></li>
+      <li><a href="#">Getting started<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></a></li>
+      <li><a href="#">Roadmap<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></a></li>
+    </ul>
+  </div>
+
+  <div class="footer-section">
+    <p class="footer-section-label">COMMUNITY & SUPPORT</p>
+    <ul class="footer-nav-list">
+      <li><a href="#">Discord<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></a></li>
+      <li><a href="https://x.com/ondas_software">𝕏<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></a></li>
+      <li><a href="#">Suggest a feature<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></a></li>
+      <li><a href="#">Privacy<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></a></li>
+      <li><a href="#">Terms of Service<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></a></li>
+    </ul>
+  </div>
+
+  <div class="footer-bottom">
+    <a class="footer-back-top" href="#hero">Back to top <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></a>
+    <div class="footer-right">
+      <span>Copyright © 2026 ONDAS — made by Macy Veil</span>
+      <span>v1.5 · Crispy Cookie — Early access. Still being built.</span>
+    </div>
+  </div>
+
+</footer>
+
+<!-- LOGIN -->
+
+<div id="login-view">
+
+  <button class="back-button notranslate" id="backButton" translate="no">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="22"
+    height="22"
+    viewBox="0 -960 960 960"
+    fill="currentColor"
+    translate="no"
+  >
+    <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/>
+  </svg>
+</button>
+
+  <div class="lv-container">
+    <canvas id="login-wave-canvas"></canvas>
+
+    <div class="lv-content-group">
+
+      <div class="lv-logo-section">
+        <span class="lv-logo">ONDAS</span>
+        <span class="lv-tagline">The Screenwriter’s Editor</span>
+      </div>
+
+      <div class="lv-actions">
+
+        <button class="lv-btn lv-btn-glass">
+          <i class="fa-brands fa-google"></i>
+          Continue with Google</button>
+
+        <button class="lv-btn lv-btn-glass">
+          <i class="fa-brands fa-apple"></i>
+          Continue with Apple</button>
+
+        <button class="lv-btn lv-btn-glass">
+          <i class="fa-solid fa-at"></i>
+          Continue with Email</button>
+
+        <div class="lv-footer">
+          <a href="#" class="create-account">Create an account</a>
+          <span>•</span>
+          <a href="#">Skip</a>
+        </div>
+
+      </div>
+
+      <div class="lv-privacy-note">
+        <p>By continuing, you agree to the <a href="#">Terms of Service</a> and acknowledge ONDAS’s <a href="#">Privacy Policy</a>.</p>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- END LOGIN -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const canvas = document.getElementById('hero-canvas');
+  const ctx = canvas.getContext('2d');
+  let width, height, t = 0;
+
+  function resizeCanvas() {
+    width = canvas.width = canvas.offsetWidth;
+    height = canvas.height = canvas.offsetHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function drawWave() {
+    if (!ctx) return;
+    ctx.clearRect(0, 0, width, height);
+    t += 0.005;
+    const particles = 140;
+    for (let i = 0; i < particles; i++) {
+      const px = (i / particles) * width;
+      const yBase = height * 0.48;
+      const waveY = yBase + Math.sin(px * 0.007 + t) * 70 + Math.sin(px * 0.015 - t * 0.5) * 32;
+      const intensity = 0.3 + 0.5 * Math.sin(px * 0.005 + t);
+      ctx.beginPath();
+      ctx.arc(px, waveY + Math.sin(i * 0.2 + t) * 6, 1.5 + intensity * 2.2, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(240, 235, 225, ${0.06 + intensity * 0.2})`;
+      ctx.fill();
+    }
+    ctx.beginPath();
+    for (let x = 0; x <= width; x += 4) {
+      const y = height * 0.48 + Math.sin(x * 0.007 + t) * 70 + Math.sin(x * 0.015 - t * 0.5) * 32;
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = 'rgba(217, 198, 176, 0.45)';
+    ctx.lineWidth = 1.8;
+    ctx.stroke();
+    requestAnimationFrame(drawWave);
+  }
+  drawWave();
+
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('line1')?.classList.add('visible');
+    }, 180);
+    setTimeout(() => {
+      document.getElementById('line3')?.classList.add('visible');
+    }, 340);
+    setTimeout(() => {
+      document.getElementById('hero-desc')?.classList.add('visible');
+      document.getElementById('hero-cta')?.classList.add('visible');
+    }, 650);
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+  }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  const navEl = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY > 60;
+    navEl.style.background = scrolled ? 'rgba(3, 3, 3, 0.85)' : 'rgba(3, 3, 3, 0.6)';
+    navEl.style.borderColor = scrolled ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.06)';
+    navEl.style.backdropFilter = scrolled ? 'blur(32px) saturate(200%)' : 'blur(20px) saturate(180%)';
+  }, { passive: true });
+
+  const loginView = document.getElementById('login-view');
+
+  function showLogin() {
+    loginView.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    loginResize();
+    requestAnimationFrame(() => loginView.classList.add('is-visible'));
+    loginAnimating = true;
+    loginDraw();
+  }
+
+  function hideLogin() {
+    loginView.style.display = 'none';
+    loginView.classList.remove('is-visible');
+    document.body.style.overflow = '';
+    loginAnimating = false;
+  }
+
+  document.getElementById('backButton').addEventListener('click', hideLogin);
+
+  document.getElementById('nav-start-btn').addEventListener('click', function(e) {
+    e.preventDefault();
+    showLogin();
+  });
+
+  document.querySelectorAll('.start-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      showLogin();
+    });
+  });
+
+  (function () {
+
+    const emailInput = document.getElementById('newsletterEmail');
+    const signUpBtn  = document.getElementById('newsletterBtn');
+
+    if (!emailInput || !signUpBtn) {
+      console.error('[Newsletter] DOM elements not found. Check IDs: newsletterEmail, newsletterBtn');
+      return;
+    }
+
+    const SUPABASE_URL = 'https://huwwsuxvehhiwpvwgqzy.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_LCuEFxzVU9ZQLQkmAe4kuw_6tvJUpXp';
+
+    let supabaseClient = null;
+    if (typeof supabase !== 'undefined') {
+      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      console.log('[Newsletter] Supabase client ready.');
+    } else {
+      console.warn('[Newsletter] Supabase SDK not found — DB inserts disabled, animations still work.');
+    }
+
+    const EASE = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+
+    function setOpacity(val, ms) {
+      emailInput.style.transition = `opacity ${ms}ms ${EASE}`;
+      emailInput.style.opacity = val;
+    }
+
+    function runSuccessAnimation() {
+      setOpacity('0', 400);
+
+      setTimeout(() => {
+        emailInput.value = '';
+        emailInput.placeholder = "You’re subscribed!";
+        setOpacity('1', 400);
+      }, 420);
+
+      setTimeout(() => {
+        setOpacity('0', 380);
+
+        setTimeout(() => {
+          emailInput.placeholder = 'Email Address*';
+          setOpacity('1', 380);
+          signUpBtn.disabled = false;
+          signUpBtn.textContent = 'Sign Up';
+        }, 400);
+
+      }, 2420);
+    }
+
+    let busy = false;
+
+    async function handleSignUp() {
+      if (busy) return;
+
+      const val = emailInput.value.trim();
+
+      if (!val || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+        emailInput.focus();
+        return;
+      }
+
+      busy = true;
+      signUpBtn.disabled = true;
+      signUpBtn.textContent = '...';
+      runSuccessAnimation();
+      setTimeout(() => { busy = false; }, 3300);
+
+      if (supabaseClient) {
+        try {
+          const { error } = await supabaseClient
+            .from('newsletter_users')
+            .insert({ email: val, subscribed: true });
+
+          if (error) {
+            if (error.code === '23505') {
+              console.warn('[Newsletter] Already subscribed:', val);
+            } else {
+              console.error('[Newsletter] Insert error:', error.message, error);
+            }
+          } else {
+            console.log('[Newsletter] Subscribed:', val);
+            try {
+              await fetch('https://huwwsuxvehhiwpvwgqzy.supabase.co/functions/v1/send-welcome-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: val })
+              });
+              console.log('[Newsletter] Welcome email sent:', val);
+            } catch (emailErr) {
+              console.error('[Newsletter] Email error:', emailErr);
+            }
+          }
+        } catch (err) {
+          console.error('[Newsletter] Network error:', err);
+        }
+      }
+    }
+
+    signUpBtn.addEventListener('click', handleSignUp);
+    emailInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSignUp();
+    });
+
+    console.log('[Newsletter] Ready.');
+
+  })();
+
+  let loginAnimating = false;
+
+  const loginCanvas = document.getElementById('login-wave-canvas');
+  const loginCtx = loginCanvas.getContext('2d');
+  let loginW, loginH, loginT = 0;
+
+  function loginResize() {
+    loginW = loginCanvas.width = window.innerWidth;
+    loginH = loginCanvas.height = window.innerHeight;
+  }
+  loginResize();
+  window.addEventListener('resize', loginResize);
+
+  const waves = [
+    { amp: 44, freq: 0.0038, speed:  1.15, alpha: 0.13, lw: 1.4, yOff: 0.35, r: 210, g: 155, b:  90 },
+    { amp: 28, freq: 0.0065, speed: -0.95, alpha: 0.08, lw: 1.0, yOff: 0.38, r: 232, g: 205, b: 158 },
+    { amp: 16, freq: 0.0115, speed:  1.45, alpha: 0.055, lw: 0.7, yOff: 0.32, r: 192, g: 168, b: 142 },
+    { amp: 10, freq: 0.018,  speed: -1.75, alpha: 0.038, lw: 0.5, yOff: 0.40, r: 215, g: 220, b: 228 },
+    { amp: 56, freq: 0.0022, speed:  0.68, alpha: 0.035, lw: 2.0, yOff: 0.36, r: 200, g: 140, b:  80 },
+  ];
+
+  function loginDraw() {
+    loginCtx.clearRect(0, 0, loginW, loginH);
+    loginT += 0.005;
+
+    waves.forEach(w => {
+      loginCtx.beginPath();
+      for (let x = 0; x <= loginW; x += 3) {
+        const y = loginH * w.yOff
+                + Math.sin(x * w.freq + loginT * w.speed) * w.amp
+                + Math.sin(x * w.freq * 1.6 - loginT * w.speed * 0.35) * (w.amp * 0.38)
+                + Math.sin(x * w.freq * 0.5 + loginT * w.speed * 0.15) * (w.amp * 0.2);
+        x === 0 ? loginCtx.moveTo(x, y) : loginCtx.lineTo(x, y);
+      }
+      loginCtx.strokeStyle = `rgba(${w.r}, ${w.g}, ${w.b}, ${w.alpha})`;
+      loginCtx.lineWidth = w.lw;
+      loginCtx.stroke();
+    });
+
+    const pCount = Math.min(55, Math.floor(loginW / 22));
+    for (let i = 0; i < pCount; i++) {
+      const px = (i / pCount) * loginW;
+      const py = loginH * 0.35 + Math.sin(px * 0.0038 + loginT * 1.15) * 44;
+      const brightness = 0.15 + 0.5 * Math.sin(px * 0.003 + loginT * 1.0);
+      loginCtx.beginPath();
+      loginCtx.arc(px, py + Math.sin(i * 0.4 + loginT * 0.6) * 5, 0.5 + brightness * 1.1, 0, Math.PI * 2);
+      loginCtx.fillStyle = `rgba(220, 180, 130, ${0.03 + brightness * 0.07})`;
+      loginCtx.fill();
+    }
+
+    if (loginAnimating) requestAnimationFrame(loginDraw);
+  }
+
+</script>
+</body>
+</html>
