@@ -1639,6 +1639,16 @@
             }
           } else {
             console.log('[Newsletter] Subscribed:', val);
+            try {
+              await fetch('https://huwwsuxvehhiwpvwgqzy.supabase.co/functions/v1/send-welcome-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: val })
+              });
+              console.log('[Newsletter] Welcome email sent:', val);
+            } catch (emailErr) {
+              console.error('[Newsletter] Email error:', emailErr);
+            }
           }
         } catch (err) {
           console.error('[Newsletter] Network error:', err);
