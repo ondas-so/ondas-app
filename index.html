@@ -1630,16 +1630,12 @@
 
           if (error) {
             if (error.code === '23505') {
-              // Email exists — reactivate it
-              const { error: updateError } = await supabaseClient
+              // Already exists — just reactivate, no welcome email
+              await supabaseClient
                 .from('newsletter_users')
                 .update({ subscribed: true })
                 .eq('email', val);
-              if (updateError) {
-                console.error('[Newsletter] Re-subscribe error:', updateError.message);
-              } else {
-                console.log('[Newsletter] Re-subscribed:', val);
-              }
+              console.log('[Newsletter] Re-subscribed:', val);
             } else {
               console.error('[Newsletter] Insert error:', error.message, error);
             }
