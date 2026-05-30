@@ -1323,7 +1323,7 @@
 
     <!--END NEWSLETTER-->
 
-    <a class="footer-email notranslate" href="mailto:hello.ondas@gmail.com" translate="no">Contact Us<img src="icons/arrow_out.svg" alt="" class="arrow_out-icon">
+    <a class="footer-email notranslate" href="mailto:reply.ondas@gmail.com" translate="no">Contact Us<img src="icons/arrow_out.svg" alt="" class="arrow_out-icon">
 </a>
   </div>
 
@@ -1360,8 +1360,8 @@
   <div class="footer-bottom">
     <a class="footer-back-top" href="#hero">Back to top <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></a>
     <div class="footer-right">
-      <span>Copyright © 2026 ONDAS — made by Macy Veil</span>
-      <span>v1.5 · Crispy Cookie</span>
+      <span>Copyright © 2026 ONDAS — by Macy Veil</span>
+      <span>v1.6 · Uncooked Pie</span>
     </div>
   </div>
 
@@ -1616,7 +1616,6 @@
             console.log('[Newsletter] Subscribed:', val);
           }
 
-          // Call Edge Function directly — does not depend on any DB webhook
           const { error: fnError } = await supabaseClient.functions.invoke('send-welcome-email', {
             body: { email: val }
           });
